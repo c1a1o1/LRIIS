@@ -4,6 +4,14 @@
 
 **LRIIS: Certified Low-Frequency Image Hiding with Cross-Band Leakage Theory and Minimax Embedding Shaping**
 
+**Authors:** Zhiyi Cao, Lina Huo, Wei Wang, Shaozhang Niu
+
+## Abstract
+
+Full-size image hiding at 6.0 bits per pixel (bpp) demands embedding in the low-frequency (LL) wavelet subband where energy survives channel attacks. Yet attacks that do not commute with the wavelet transform redistribute embedded energy into high-frequency bands, opening a post-attack cross-band leakage channel exploitable by steganalysts. We introduce LRIIS, a framework addressing this threat through three contributions. First, a post-INN projection clips the final container's wavelet residual to a spatially adaptive budget, yielding a deterministic pixel-domain output certificate with 100% compliance. Second, we formalize post-attack leakage via a cross-band operator, characterize its gain for both linear and nonlinear attacks, and suppress mutual information through a CLUB variational objective -- driving attacker recovery to the zero-predictor baseline. Third, given per-subband leakage coefficients, we solve a Minimax Allocation over Leakage Subbands (MALS) linear program over 64 wavelet-packet subbands to determine the energy allocation minimizing worst-case leakage; a training-time regularizer guides the invertible network toward this profile, contributing +2.5 dB as an independently verified factor. On DIV2K and COCO, LRIIS outperforms seven recent methods by 3--5 dB under fully blind extraction -- the strictest condition among all compared approaches.
+
+---
+
 This directory contains the implementation code for the LRIIS framework, which hides full-size secret images (6.0 bpp) in the low-frequency wavelet subband with three certified guarantees:
 
 - **C1 (Post-INN Projection):** Deterministic pixel-domain output certificate with 100% compliance
