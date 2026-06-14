@@ -1,45 +1,53 @@
-# LRIIS: Low-Frequency Robust Image Hiding via Wavelet Contrastive Learning
+# LRIIS Code
 
-**Authors:** Zhiyi Cao, Lina Huo, Wei Wang, Shaozhang Niu
+## Structure
 
-**Affiliation:** College of Computer and Cyberspace Security, Hebei Normal University / Beijing University of Posts and Telecommunications
-
----
-
-## Abstract
-
-Existing high-frequency image information hiding methods suffer from limited robustness against container image distortions and depend on predefined attack labels. We propose LRIIS, a low-frequency embedding framework that leverages an invertible neural network (INN) with dynamic adaptive strength for secret data concealment. To enhance robustness, we introduce an uncertainty-aware wavelet contrastive learning module (WC) that separates high-frequency subbands from low-frequency subbands, reducing cross-frequency artifacts. Furthermore, we design an unsupervised Attacked Image Enhancement Module (AEM) with multi-scale consistency constraints to generate attack-adaptive de-noised images. Unlike prior methods that require per-sample attack type labels for conditioning, AEM operates with only the feasible range of attack parameters known during training, enabling robust extraction under unknown attack severities at inference time. Experimental results on COCO and DIV2K demonstrate that LRIIS outperforms state-of-the-art methods by 3–5 dB in PSNR and 0.02–0.05 in SSIM for secret image extraction, while also generalizing to unseen distortions including JPEG compression, Gaussian noise, and geometric attacks without retraining.
-
----
-
-## Key Contributions
-
-1. **Low-frequency wavelet embedding** with dynamic adaptive strength balances imperceptibility and robustness.
-2. **Uncertainty-aware wavelet contrastive loss** separates high/low-frequency subbands to suppress cross-frequency artifacts.
-3. **Unsupervised Attacked Image Enhancement Module (AEM)** restores distorted images using attack parameter range, without per-sample labels.
-
----
-
-## Code Availability
-
-> ⚠️ **The source code and pre-trained models will be made publicly available upon paper acceptance.**
-
-This repository currently contains the paper manuscript. The full implementation (training code, evaluation scripts, and pre-trained models) will be released after the paper is accepted for publication.
-
----
-
-## Citation
-
-If you find this work useful, please cite:
-
-```bibtex
-@article{cao2025lriis,
-  title={LRIIS: Low-Frequency Robust Image Hiding via Wavelet Contrastive Learning},
-  author={Cao, Zhiyi and Huo, Lina and Wang, Wei and Niu, Shaozhang},
-  year={2025}
-}
+```
+code/
+├── models/
+│   ├── __init__.py
+│   ├── inn.py          # INN + DWT/IDWT + AmplitudeClamp + HFScaling (Contribution 1)
+│   ├── attacker.py     # HF Leakage Attacker + LeakageLoss (Contribution 2)
+│   └── aem.py          # Blind AEM + SeverityEncoder + OrdinalLoss (Contribution 3)
+├── attacks.py           # 8-type differentiable attack layer
+├── train.py             # Main training script
+├── evaluate.py          # Evaluation + ablation + generalization tests
+├── requirements.txt
+└── README.md
 ```
 
-## License
+## Training
 
-Code will be released under the MIT License upon publication.
+```bash
+python train.py --data_root ./data --epochs 80 --batch_size 4 --seed 42
+```
+
+Seeds for 5-run reproducibility: `{42, 123, 2024, 7777, 99999}`
+
+## Evaluation
+
+```bash
+# Standard evaluation
+python evaluate.py --checkpoint ./checkpoints/lriis_final.pth --mode eval
+
+# Ablation study
+python evaluate.py --mode ablation
+
+# Out-of-range generalization
+python evaluate.py --mode generalization
+```
+
+## Paper Correspondence
+
+| Paper Section | Code File | Key Class/Function |
+|---|---|---|
+| §3.1 Amplitude-Clipped Embedding | `models/inn.py` | `AmplitudeClamp`, `LRIISEncoder` |
+| §3.2 Secret-Conditioned Leakage | `models/attacker.py` | `HFLeakageAttacker`, `LeakageLoss` |
+| §3.3 Type-Severity Blind AEM | `models/aem.py` | `BlindAEM`, `SeverityEncoder`, `OrdinalSeverityLoss` |
+| §3.3 Training attacks | `attacks.py` | `AttackLayer` (8 types) |
+| Eq.(budget) | `models/inn.py` | `AmplitudeClamp.compute_budget()` |
+| Eq.(clamp) | `models/inn.py` | `AmplitudeClamp.forward()` |
+| Eq.(hf) + Eq.(att) | `models/attacker.py` | `LeakageLoss` |
+| Eq.(blind_aem) | `models/aem.py` | `BlindAEM.forward()` |
+| Eq.(ordinal) | `models/aem.py` | `OrdinalSeverityLoss.forward()` |
+| Eq.(total) | `train.py` | `l_total` computation |
